@@ -5,6 +5,9 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity(name = "Student")
+@Table(name = "student", uniqueConstraints = {
+        @UniqueConstraint(name = "student_email_unique", columnNames = "email")
+})
 @Getter
 @Setter
 @ToString
@@ -31,7 +34,7 @@ public class Student {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String lastName;
 
-    @Column(nullable = false, columnDefinition = "TEXT", unique = true)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String email;
 
     @Column(name="age", nullable = false)
