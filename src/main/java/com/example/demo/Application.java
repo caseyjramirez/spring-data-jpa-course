@@ -1,5 +1,6 @@
 package com.example.demo;
 
+import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @SpringBootApplication
 public class Application {
@@ -54,7 +56,19 @@ public class Application {
             studentRepository.nativeQuery("Casey", 18)
                     .ifPresent(students -> students.forEach(System.out::println));
 
-            System.out.println(studentRepository.deleteStudentByEmail("testing@email.com"));
+            Faker faker = new Faker();
+
+            for(int i = 0; i < 200; i++) {
+                System.out.println(i);
+                Random randomAge = new Random();
+                Student newStudent = new Student(faker.name().firstName(), faker.name().firstName(), faker.internet().emailAddress(), randomAge.nextInt(30));
+                studentRepository.save(newStudent);
+            }
+
+            List<Student> students = studentRepository.findAll();
+            students.forEach(System.out::println);
+
+
         };
     }
 
