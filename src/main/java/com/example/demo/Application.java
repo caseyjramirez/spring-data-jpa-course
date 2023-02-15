@@ -5,11 +5,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 @SpringBootApplication
 public class Application {
@@ -21,55 +19,47 @@ public class Application {
     @Bean
     CommandLineRunner commandLineRunner(StudentRepository studentRepository) {
         return args -> {
+            int studentCount = 400;
+            int page = 0;
+            int itemCount = 20;
 
-            Student casey = new Student("Casey", "Ramirez", "testing@email.com", 23);
-            Student casey1 = new Student("Casey", "Xavier", "testing1@email.com", 23);
-            Student casey2 = new Student("Casey", "Badger", "testing2@email.com", 23);
-            Student casey3 = new Student("Casey", "Clairo", "testing3@email.com", 23);
-            Student jonny = new Student("Jonny", "Randall", "jonny@email.com", 30);
-            studentRepository.saveAll(List.of(casey, casey1, casey2, casey3, jonny));
-            System.out.println("**************************");
+            generateRandomStudents(studentRepository, studentCount);
+            Page<Student> students = sortStudentsByName(studentRepository, page, itemCount);
 
-            studentRepository
-                    .findStudentByEmail("jonny@email.com")
-                    .ifPresentOrElse(
-                            System.out::println,
-                            () -> {System.out.println("NOT FOUND");
-                    });
 
-            studentRepository
-                    .findStudentsByFirstName("Casey")
-                    .ifPresentOrElse(
-                            students -> {
-                                students.forEach(System.out::println);
-                            },
-                            () -> {
-                                System.out.println("Not Present");
-                            }
-                    );
 
-            List<Student> query = studentRepository.findStudentsByAgeEqualsAndFirstNameEquals(30, "Jonny");
-            List<Student> query1 = studentRepository.findStudentsByAgeEqualsAndFirstNameEquals(25, "Casey");
-            System.out.println(query);
-            System.out.println(query1);
-
-            studentRepository.nativeQuery("Casey", 18)
-                    .ifPresent(students -> students.forEach(System.out::println));
-
-            Faker faker = new Faker();
-
-            for(int i = 0; i < 200; i++) {
-                System.out.println(i);
-                Random randomAge = new Random();
-                Student newStudent = new Student(faker.name().firstName(), faker.name().firstName(), faker.internet().emailAddress(), randomAge.nextInt(30));
-                studentRepository.save(newStudent);
-            }
-
-            List<Student> students = studentRepository.findAll();
             students.forEach(System.out::println);
-
+            System.out.println(students);
 
         };
+    }
+
+
+    private static Page<Student> sortStudentsByName(StudentRepository studentRepository, int page, int itemCount) {
+
+        Sort sort = Sort.by("firstName").ascending()
+                .and(Sort.by("lastName").ascending());
+
+        PageRequest pageRequest = PageRequest.of(page, itemCount, sort);
+
+        return studentRepository.findAll(pageRequest);
+    }
+
+    private void generateRandomStudents(StudentRepository studentRepository, int count) {
+        Faker faker = new Faker();
+
+        for(int i = 0; i < count; i++) {
+            String firstName = faker.name().firstName();
+            String lastName = faker.name().lastName();
+            int uniqueId = i + 1;
+
+            Student newStudent = new Student(
+                    firstName,
+                    lastName,
+                    String.format("%s.%s.%d@gmail.com", firstName, lastName, uniqueId),
+                    faker.number().numberBetween(15, 35));
+            studentRepository.save(newStudent);
+        }
     }
 
 }
