@@ -27,8 +27,7 @@ public class Application {
         return args -> {
             Faker faker = new Faker();
 
-            int studentCount = 400;
-            int bookCount = 400;
+            int studentCount = 100;
             int page = 0;
             int itemCount = 20;
             Sort sort = Sort.by("firstName").ascending().and(Sort.by("lastName").ascending());
@@ -83,6 +82,9 @@ public class Application {
                 ));
             }
 
+            student.addCourse(new Course(
+                    "Testing", "Tesying"
+            ));
 
 
             StudentIdCard studentIdCard = new StudentIdCard(cardId, student);

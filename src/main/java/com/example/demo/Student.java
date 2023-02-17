@@ -60,6 +60,22 @@ public class Student {
     )
     private List<Book> books = new ArrayList<>();
 
+    @ManyToMany(
+            cascade = {CascadeType.ALL, CascadeType.REMOVE}
+    )
+    @JoinTable(
+            name = "enrollment",
+            joinColumns = @JoinColumn(
+                    name = "student_id",
+                    foreignKey = @ForeignKey(name = "enrollment_student_fk")
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "course_id",
+                    foreignKey = @ForeignKey(name = "enrollment_course_fk")
+            )
+    )
+    private List<Course> courses = new ArrayList<>();
+
     public void addBook(Book book) {
         if(!this.books.contains(book)) {
             this.books.add(book);
@@ -76,6 +92,20 @@ public class Student {
 
     public List<Book> getBooks() {
         return books;
+    }
+
+    public void addCourse(Course course) {
+        this.courses.add(course);
+        course.getStudents().add(this);
+    }
+
+    public void removeCourse(Course course) {
+        courses.remove(course);
+        course.getStudents().remove(this);
+    }
+
+    public List<Course> getCourses() {
+        return courses;
     }
 
     public Student(String firstName, String lastName, String email, Integer age) {
