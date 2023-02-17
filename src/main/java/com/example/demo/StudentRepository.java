@@ -17,6 +17,9 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query("SELECT s FROM Student s WHERE s.firstName = ?1")
     Optional<List<Student>> findStudentsByFirstName(String firstName);
 
+    @Query("SELECT s FROM Student s WHERE s.id = :id")
+    Optional<Student> findStudentById(@Param("id") Long id);
+
 // SQL NATIVE QUERY
     @Query(value = "SELECT * FROM Student WHERE first_name = :firstName AND age >= :age", nativeQuery = true)
     Optional<List<Student>> nativeQuery(@Param("firstName") String firstName, @Param("age") Integer age);
