@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -24,7 +25,9 @@ public class Application {
     @Bean
     CommandLineRunner commandLineRunner(StudentRepository studentRepository, StudentIdCardRepository studentIdCardRepository, BookRepository bookRepository) {
         return args -> {
-            int studentCount = 100;
+            Faker faker = new Faker();
+
+            int studentCount = 400;
             int bookCount = 400;
             int page = 0;
             int itemCount = 20;
@@ -32,12 +35,17 @@ public class Application {
 
 
             generateNewStudents(studentIdCardRepository, studentCount);
-            generateNewBooks(bookRepository, studentRepository, bookCount, studentCount);
+//            generateNewBooks(bookRepository, studentRepository, bookCount, studentCount);
+
+//            Page<Student> studentPage = sortStudents(studentRepository, page, itemCount, sort);
+//            studentPage.forEach(student -> System.out.println(student.toString()));
+
             System.out.println("***************************************");
-
-            Page<Student> studentPage = sortStudents(studentRepository, page, itemCount, sort);
-            studentPage.forEach(student -> System.out.println(student.toString()));
-
+            studentRepository.findById(1L).ifPresent(s -> {
+                System.out.println(s);
+                List<Book> books = s.getBooks();
+                books.forEach(System.out::println);
+            });
 
 
         };
@@ -53,6 +61,7 @@ public class Application {
 
     private void generateNewStudents(StudentIdCardRepository studentIdCardRepository, int count) {
         Faker faker = new Faker();
+        Random random = new Random();
 
         for(int i = 0; i < count; i++) {
             String firstName = faker.name().firstName();
@@ -66,6 +75,15 @@ public class Application {
                     String.format("%s.%s.%d@gmail.com", firstName, lastName, uniqueId),
                     faker.number().numberBetween(15, 35)
             );
+
+            for (int j = 0; j < random.nextInt(20); j++) {
+                student.addBook(new Book(
+                        faker.book().title(),
+                        Instant.now()
+                ));
+            }
+
+
 
             StudentIdCard studentIdCard = new StudentIdCard(cardId, student);
 
@@ -88,12 +106,6 @@ public class Application {
             );
 
             bookRepository.save(book);
-
-
-
-
-
-
         }
     }
 

@@ -5,8 +5,6 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @Entity
 @Table(name = "student", uniqueConstraints = {
@@ -55,11 +53,30 @@ public class Student {
     private StudentIdCard studentIdCard;
 
     @OneToMany(
-            orphanRemoval = true,
             mappedBy = "student",
-            cascade = CascadeType.ALL
+            orphanRemoval = true,
+            cascade = {CascadeType.ALL, CascadeType.REMOVE},
+            fetch = FetchType.EAGER
     )
-    private final List<Book> books = new ArrayList<>();
+    private List<Book> books = new ArrayList<>();
+
+    public void addBook(Book book) {
+        if(!this.books.contains(book)) {
+            this.books.add(book);
+            book.setStudent(this);
+        }
+    }
+
+    public void removeBook(Book book) {
+        if(this.books.contains(book)) {
+            this.books.remove(book);
+            book.setStudent(null);
+        }
+    }
+
+    public List<Book> getBooks() {
+        return books;
+    }
 
     public Student(String firstName, String lastName, String email, Integer age) {
         this.firstName = firstName;
@@ -68,4 +85,14 @@ public class Student {
         this.age = age;
     }
 
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", age=" + age +
+                '}';
+    }
 }

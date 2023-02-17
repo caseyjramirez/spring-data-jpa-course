@@ -1,7 +1,9 @@
 package com.example.demo;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -12,6 +14,8 @@ import java.time.Instant;
 )
 @Getter
 @Setter
+@NoArgsConstructor
+@ToString
 public class Book {
 
     @Id
@@ -59,5 +63,10 @@ public class Book {
         this.bookName = bookName;
         this.createdAt = createdAt;
         this.student = student;
+    }
+
+    public Book(String bookName, Instant createdAt) {
+        this.bookName = bookName;
+        this.createdAt = createdAt;
     }
 }
