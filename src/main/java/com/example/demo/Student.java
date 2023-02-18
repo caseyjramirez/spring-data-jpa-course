@@ -1,6 +1,8 @@
 package com.example.demo;
 
 import lombok.*;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -60,21 +62,15 @@ public class Student {
     )
     private List<Book> books = new ArrayList<>();
 
-    @ManyToMany(
-            cascade = {CascadeType.ALL, CascadeType.REMOVE}
+    @OneToMany(
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.REMOVE
+            },
+            mappedBy = "student"
     )
-    @JoinTable(
-            name = "enrollment",
-            joinColumns = @JoinColumn(
-                    name = "student_id",
-                    foreignKey = @ForeignKey(name = "enrollment_student_fk")
-            ),
-            inverseJoinColumns = @JoinColumn(
-                    name = "course_id",
-                    foreignKey = @ForeignKey(name = "enrollment_course_fk")
-            )
-    )
-    private List<Course> courses = new ArrayList<>();
+
+    private List<Enrollment> enrollments = new ArrayList<>();
 
     public void addBook(Book book) {
         if(!this.books.contains(book)) {
@@ -94,19 +90,22 @@ public class Student {
         return books;
     }
 
-    public void addCourse(Course course) {
-        this.courses.add(course);
-        course.getStudents().add(this);
+
+    public void addEnrollment(Enrollment enrollment) {
+        if(!enrollments.contains(enrollment)) {
+            enrollments.add(enrollment);
+        }
     }
 
-    public void removeCourse(Course course) {
-        courses.remove(course);
-        course.getStudents().remove(this);
+    public void removeEnrollment(Enrollment enrollment) {
+        enrollments.remove(enrollment);
     }
 
-    public List<Course> getCourses() {
-        return courses;
+    public List<Enrollment> getEnrollments() {
+        return enrollments;
     }
+
+
 
     public Student(String firstName, String lastName, String email, Integer age) {
         this.firstName = firstName;

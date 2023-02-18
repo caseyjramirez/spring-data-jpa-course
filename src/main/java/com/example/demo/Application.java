@@ -10,10 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @SpringBootApplication
 public class Application {
@@ -23,11 +20,14 @@ public class Application {
     }
 
     @Bean
-    CommandLineRunner commandLineRunner(StudentRepository studentRepository, StudentIdCardRepository studentIdCardRepository, BookRepository bookRepository) {
+    CommandLineRunner commandLineRunner(StudentRepository studentRepository, StudentIdCardRepository studentIdCardRepository, BookRepository bookRepository, CourseRepository courseRepository) {
         return args -> {
             Faker faker = new Faker();
 
             int studentCount = 100;
+            int bookCount = 400;
+            int courseCount = 20;
+            int enrollmentCount = 350;
             int page = 0;
             int itemCount = 20;
             Sort sort = Sort.by("firstName").ascending().and(Sort.by("lastName").ascending());
@@ -35,9 +35,12 @@ public class Application {
 
             generateNewStudents(studentIdCardRepository, studentCount);
 //            generateNewBooks(bookRepository, studentRepository, bookCount, studentCount);
+            generateCourses(courseRepository, courseCount);
+//            generateEnrollments(studentRepository, courseRepository, studentCount, courseCount, enrollmentCount);
 
-//            Page<Student> studentPage = sortStudents(studentRepository, page, itemCount, sort);
-//            studentPage.forEach(student -> System.out.println(student.toString()));
+
+
+
 
             System.out.println("***************************************");
             studentRepository.findById(1L).ifPresent(s -> {
@@ -82,8 +85,11 @@ public class Application {
                 ));
             }
 
-            student.addCourse(new Course(
-                    "Testing", "Tesying"
+            student.addEnrollment(new Enrollment(
+                    new EnrollementId(),
+                    student,
+                    new Course("Class", "Department"),
+                    Instant.now()
             ));
 
 
@@ -93,13 +99,17 @@ public class Application {
         }
     }
 
+    private Long getRandomId(int count) {
+        return 1L + (long) (Math.random() * (Long.valueOf(count) - 1L));
+    }
+
     private void generateNewBooks(BookRepository bookRepository, StudentRepository studentRepository, int bookCount, int studentCount) {
         Faker faker = new Faker();
 
         for (int i = 0; i < bookCount; i++) {
 
-            long generatedLong = 1L + (long) (Math.random() * (Long.valueOf(studentCount) - 1L));
-            Student student = studentRepository.findStudentById(generatedLong).get();
+            long randomId = getRandomId(studentCount);
+            Student student = studentRepository.findStudentById(randomId);
 
             Book book = new Book(
                     faker.book().title(),
@@ -109,6 +119,38 @@ public class Application {
 
             bookRepository.save(book);
         }
+    }
+
+    private void generateCourses(CourseRepository courseRepository, int courseCount) {
+        Faker faker = new Faker();
+        Random rand = new Random();
+
+        List<String> courses = Arrays.asList("Math", "English", "Science", "CTE");
+
+        for (int i = 0; i < courseCount; i++) {
+            courseRepository.save(new Course(
+                    faker.book().title(),
+                    courses.get(rand.nextInt(courses.size()))
+            ));
+
+        }
+    }
+
+    private void generateEnrollments(StudentRepository studentRepository, CourseRepository courseRepository, int studentCount, int courseCount, int enrollmentCount) {
+
+        for (int i = 0; i < enrollmentCount; i++) {
+            long studentId = getRandomId(studentCount);
+            long courseId = getRandomId(courseCount);
+
+            Student student = studentRepository.findStudentById(studentId);
+            Course course = courseRepository.findCourseById(courseId).get();
+
+            System.out.println(course);
+            System.out.println(student);
+
+        }
+
+
     }
 
 
