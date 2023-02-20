@@ -37,8 +37,8 @@ public class Enrollment {
 
 
     @Column(
-            nullable = false
-//            columnDefinition = "TIMESTAMP WITHOUT TIME ZONE"
+            nullable = false,
+            columnDefinition = "TIMESTAMP WITHOUT TIME ZONE"
     )
     private Instant createdAt;
 
